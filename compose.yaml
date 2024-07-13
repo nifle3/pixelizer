@@ -1,49 +1,148 @@
-# Comments are provided throughout this file to help you get started.
-# If you need more help, visit the Docker compose reference guide at
-# https://docs.docker.com/compose/compose-file/
+x-minio-common: &minio-common
+  image: quay.io/minio/minio:RELEASE.2024-07-13T01-46-15Z
+  command: server --console-address ":9001" http://minio{1...4}/data{1...2}
+  expose:
+    - "9000"
+    - "9001"
+  environment:
+    MINIO_ROOT_USER: nifle
+    MINIO_ROOT_PASSWORD: qweasd
+  healthcheck:
+    test: ["CMD", "mc", "ready", "local"]
+    interval: 5s
+    timeout: 5s
+    retries: 5
+  networks:
+    - prod
 
-# Here the instructions define your application as a service called "server".
-# This service is built from the Dockerfile in the current directory.
-# You can add other services your application may depend on here, such as a
-# database or a cache. For examples, see the Awesome Compose repository:
-# https://github.com/docker/awesome-compose
 services:
   server:
+    container_name: "server"
+    restart: always
     build:
       context: .
     ports:
       - 8080:8080
+    depends_on:
+      db: 
+        condition: service_healthy
+      minio1:
+        condition: service_healthy
+      minio2:
+        condition: service_healthy
+      nginx:
+        condition: service_started
+      redis:
+        condition: service_healthy
+    networks:
+      - prod
 
-# The commented out section below is an example of how to define a PostgreSQL
-# database that your application can use. `depends_on` tells Docker Compose to
-# start the database before your application. The `db-data` volume persists the
-# database data between container restarts. The `db-password` secret is used
-# to set the database password. You must create `db/password.txt` and add
-# a password of your choosing to it before running `docker compose up`.
-#     depends_on:
-#       db:
-#         condition: service_healthy
-#   db:
-#     image: postgres
-#     restart: always
-#     user: postgres
-#     secrets:
-#       - db-password
-#     volumes:
-#       - db-data:/var/lib/postgresql/data
-#     environment:
-#       - POSTGRES_DB=example
-#       - POSTGRES_PASSWORD_FILE=/run/secrets/db-password
-#     expose:
-#       - 5432
-#     healthcheck:
-#       test: [ "CMD", "pg_isready" ]
-#       interval: 10s
-#       timeout: 5s
-#       retries: 5
-# volumes:
-#   db-data:
-# secrets:
-#   db-password:
-#     file: db/password.txt
+  db:
+    container_name: "postgres"
+    image: postgres:12.19-bullseye
+    restart: always
+    environment:
+      - POSTGRES_DB=pixelizer
+      - POSTGRES_USER=nifle
+      - POSTGRES_PASSWORD=niflepassword
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-U", "nifle", "-d", "pixelizer"]
+      interval: 30s
+      timeout: 60s
+      retries: 5
+      start_period: 80s 
+    networks:
+      - prod 
+    expose:
+      - 5432
+    volumes:
+      - db_data:/var/lib/postgresql
+    
+  pg_admin:
+    container_name: "pg_admin"
+    image: dpage/pgamdin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: nifle3@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: qweasd
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - prod
+    volumes:
+      - pg_admin_data:/var/lib/pgadmin
+    ports:
+      - 5000:5432
 
+  minio1:
+    container_name: "minio1"
+    volumes:
+      - minio11_data:/data1
+      - minio12_data:/data2
+
+  minio2:
+    container_name: "minio2"
+    volumes:
+      - minio21_data:/data1
+      - minio22_data:/data2
+
+  nginx:
+    container_name: "nginx_reverse_for_minio"
+    image: nginx:1.19.2-alpine
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - 9000:9000
+      - 9001:9001
+    depends_on:
+      - minio1
+      - minio2
+    networks:
+      - prod
+
+  redis: 
+    container_name: "redis"
+    image: redis:7.2-bookworm
+    environment:
+      - REDIS_PASSWORD=qwe
+      - REDIS_USER=nifle
+      - REDIS_USER_PASSWORD=niflepass
+    expose:
+      - 6380
+    volumes:
+      - redis_data:/data
+    networks:
+      - prod
+    command: >
+      sh -c '
+        mkdir -p /usr/local/etc/redis &&
+        echo "bind 0.0.0.0" > /usr/local/etc/redis/redis.conf &&
+        echo "requirepass $REDIS_PASSWORD" >> /usr/local/etc/redis/redis.conf &&
+        echo "appendonly yes" >> /usr/local/etc/redis/redis.conf &&
+        echo "appendfsync everysec" >> /usr/local/etc/redis/redis.conf &&
+        echo "user default on nopass ~* +@all" > /usr/local/etc/redis/users.acl &&
+        echo "user $REDIS_USER on >$REDIS_USER_PASSWORD ~* +@all" >> /usr/local/etc/redis/users.acl &&
+        redis-server /usr/local/etc/redis/redis.conf --aclfile /usr/local/etc/redis/users.acl
+      '
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "$REDIS_PASSWORD", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+    tty: true
+    stdin_open: true
+
+volumes:
+  pg_admin_data:
+  db_data:
+  redis_data:
+  minio11_data:
+  minio12_data:
+  minio21_data:
+  minio22_data:
+
+networks:
+  prod:
+    driver: bridge
