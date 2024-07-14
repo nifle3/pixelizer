@@ -10,14 +10,6 @@ ENV PYTHONUNBUFFERED=1
 WORKDIR /app
 
 ARG UID=10001
-RUN adduser \
-    --disabled-password \
-    --gecos "" \
-    --home "/nonexistent" \
-    --shell "/sbin/nologin" \
-    --no-create-home \
-    --uid "${UID}" \
-    appuser
 
 RUN pip install poetry
 COPY pyproject.toml poetry.lock ./
@@ -32,9 +24,8 @@ RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install --no-dev
 
 FROM python:${PYTHON_VERSION}-slim
 
-USER appuser
 WORKDIR /app
 COPY --from=builder /app ./
 
 EXPOSE 8080
-CMD python app/main.py
+CMD python ./app/main.py

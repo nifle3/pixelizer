@@ -7,7 +7,9 @@ authors = ["nifle3 <kuper116rus.2005@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "3.12.+"
+python = "^3.12"
+numpy = "^2.0.0"
+opencv-python = "^4.10.0.84"
 
 
 [build-system]
