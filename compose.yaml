@@ -1,6 +1,6 @@
 x-minio-common: &minio-common
   image: quay.io/minio/minio:RELEASE.2024-07-13T01-46-15Z
-  command: server --console-address ":9001" http://minio{1...4}/data{1...2}
+  command: server --console-address ":9001" http://minio{1...2}/data{1...2}
   expose:
     - "9000"
     - "9001"
@@ -15,14 +15,21 @@ x-minio-common: &minio-common
   networks:
     - prod
 
+x-worker-pixelizer-common: &worker-common-pixelizer
+  bulid:
+    context: ./worker
+  restart: always
+  networks:
+    - prod
+
 services:
   server:
     container_name: "server"
     restart: always
     build:
-      context: .
+      context: ./service
     ports:
-      - 8080:8080
+      - 8000:8000
     depends_on:
       db: 
         condition: service_healthy
@@ -34,8 +41,18 @@ services:
         condition: service_started
       redis:
         condition: service_healthy
+      keycloack:
+        condition: service_healthy
     networks:
       - prod
+
+  worker1:
+    <<: *worker-common-pixelizer
+    container_name: worker1
+  
+  worker2:
+    <<: *worker-common-pixelizer
+    container_name: worker2
 
   db:
     container_name: "postgres"
@@ -76,12 +93,14 @@ services:
       - 5000:5432
 
   minio1:
+    <<: *minio-common
     container_name: "minio1"
     volumes:
       - minio11_data:/data1
       - minio12_data:/data2
 
   minio2:
+    <<: *minio-common
     container_name: "minio2"
     volumes:
       - minio21_data:/data1
@@ -134,6 +153,58 @@ services:
     tty: true
     stdin_open: true
 
+  keycloack:
+    container_name: "keycloack"
+    image: quay.io/keycloak/keycloak:23.0.6
+    networks:
+      - prod
+    depends_on:
+      keycloack_db:
+        condition: service_healthy
+    command: start
+    ports:
+      - 8080:8080
+    restart: always
+    environment:
+      - KC_HOSTNAME=localhost
+      - KC_HOSTNAME_PORT=8000
+      - KC_HOSTNAME_STRICT_BACKCHANNEL=false
+      - KC_HTTP_ENABLED=true
+      - KC_HOSTNAME_STRICT_HTTPS=false
+      - KC_HEALTH_ENABLED=true
+      - KEYCLOAK_ADMIN=nifle
+      - KEYCLOAK_ADMIN_PASSWORD=niflepassword
+      - KC_DB=postgres
+      - KC_DB_URL=jdbc:postgresql://postgres/keycloack
+      - KC_DB_USERNAME=nifle
+      - KC_DB_PASSWORD=niflepassword
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/8080;echo -e \"GET /health/ready HTTP/1.1\r\nhost: http://localhost\r\nConnection: close\r\n\r\n\" >&3;grep \"HTTP/1.1 200 OK\" <&3"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+
+  keycloack_db:
+    container_name: "keycloack_db"
+    image: postgres:12.19-bullseye
+    restart: always
+    environment:
+      - POSTGRES_DB=keycloack
+      - POSTGRES_USER=nifle
+      - POSTGRES_PASSWORD=niflepassword
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-U", "nifle", "-d", "pixelizer"]
+      interval: 30s
+      timeout: 60s
+      retries: 5
+      start_period: 80s 
+    networks:
+      - prod 
+    expose:
+      - 5433
+    volumes:
+      - keycloack_db_data:/var/lib/postgresql
+
 volumes:
   pg_admin_data:
   db_data:
@@ -142,6 +213,7 @@ volumes:
   minio12_data:
   minio21_data:
   minio22_data:
+  keycloack_db_data:
 
 networks:
   prod:
