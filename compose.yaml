@@ -16,7 +16,7 @@ x-minio-common: &minio-common
     - prod
 
 x-worker-pixelizer-common: &worker-common-pixelizer
-  bulid:
+  build:
     context: ./worker
   restart: always
   networks:
@@ -28,8 +28,8 @@ services:
     restart: always
     build:
       context: ./service
-    ports:
-      - 8000:8000
+    expose:
+      - 8000
     depends_on:
       db: 
         condition: service_healthy
@@ -204,6 +204,44 @@ services:
       - 5433
     volumes:
       - keycloack_db_data:/var/lib/postgresql
+
+  front:
+    container_name: "front"
+    expose:
+      - 3000
+    build:
+      context: ./frontend
+    depends_on:
+      - server
+    networks:
+      - prod
+  
+  zookeper:
+    container_name: "zookeper"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - 2181:2181
+    networks:
+      - prod
+
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    depends_on:
+      - zookeeper
+    expose:
+      - 29092
+    container_name: kafka
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 2
+    networks:
+      - prod
 
 volumes:
   pg_admin_data:
