@@ -1,13 +1,20 @@
 from uuid import UUID
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr, Base64Str
 
 
 class AddedUser(BaseModel):
-    email: str
-    password: str
+    email: EmailStr
     nickname: str
+    password: str
+    photo: Base64Str
 
 
-class GetedUser(AddedUser):
+class GetedShortUser(BaseModel):
     id: UUID
-    link_to_profile_picture: str
+    nickname: str
+    photo_link: str
+
+
+class GetedUser(GetedShortUser):
+    email: EmailStr
+    description: str
