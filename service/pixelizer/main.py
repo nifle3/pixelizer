@@ -1,13 +1,13 @@
-from fastapi import FastAPI
-from sqlalchemy.ext.asyncio import create_async_engine 
+from asyncio import run
 
 
-SQL_ALCHEMY_URL_CONNECTION = ""
-engine = create_async_engine(SQL_ALCHEMY_URL_CONNECTION, echo=True)
+async def _main():
+    import uvicorn
 
-app = FastAPI()
+    config = uvicorn.Config("main:app", port=8000, log_level="info")
+    server = uvicorn.Server(config)
+    server.run()
 
 
-@app.get("/")
-def index():
-    return {"message": "hello world"}
+if __name__ == "__main__":
+    run(_main)
