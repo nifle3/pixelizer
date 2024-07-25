@@ -41,6 +41,7 @@ class _Config(BaseSettings):
     db = _DbConfig()
     kafka = _KafkaConfig()
     minio = _MinioConfig()
+    env_type: str
 
 
 config = _Config()
