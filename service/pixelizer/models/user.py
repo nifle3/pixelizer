@@ -14,6 +14,7 @@ class User(Base):
     nickname: Mapped[str] = mapped_column(String(255), unique=True)
     profile_image: Mapped[str] = mapped_column(String(255))
     description: Mapped[str] = mapped_column(Text)
-    keycloack_id: Mapped[UUID] = mapped_column(SQLUUID, unique=True)
+    password: Mapped[str] = mapped_column(String(255))
+    email: Mapped[str] = mapped_column(String(255))
     images: Mapped[List[Image]] = relationship(back_populates="user",
                                                cascade="all, delete-orphan")
