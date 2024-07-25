@@ -1,7 +1,7 @@
 from sys import stdout
 from typing import Final
-from env_type import EnvTypeEnum
 from loguru import logger
+from .env_type import EnvTypeEnum
 
 
 _FORMAT: Final[str] = '{time} {level} {message}'

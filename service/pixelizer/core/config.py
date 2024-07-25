@@ -1,3 +1,4 @@
+from .env_type import EnvTypeEnum
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import (
     RedisDsn,
@@ -6,42 +7,21 @@ from pydantic import (
 )
 
 
-class _RedisConfig(BaseSettings):
-    model_fields = SettingsConfigDict(env_prefix='redis_')
-
-    url: RedisDsn
-
-
-class _DbConfig(BaseSettings):
-    model_fields = SettingsConfigDict(env_prefix='postgres_')
-
-    url: PostgresDsn
-
-
-class _KafkaConfig(BaseSettings):
-    model_fields = SettingsConfigDict(env_prefix='kafka_')
-
-    url: KafkaDsn
-
-
-class _MinioConfig(BaseSettings):
-    model_fields = SettingsConfigDict(env_prefix='minio_')
-
-    url: str
-    access_key: str
-    secret_key: str
-
-
 class _Config(BaseSettings):
-    model_fields = SettingsConfigDict(env_file='.env',
+    model_config = SettingsConfigDict(case_sensitive=False,
+                                      env_file='.env',
+                                      env_file_encoding='utf-8',
                                       env_ignore_empty=True,
-                                      env_file_encoding='utf-8')
+                                      env_nested_delimiter='_',
+                                      extra='ignore')
 
-    redis = _RedisConfig()
-    db = _DbConfig()
-    kafka = _KafkaConfig()
-    minio = _MinioConfig()
-    env_type: str
+    redis_url: RedisDsn
+    postgres_url: PostgresDsn
+    kafka_url: KafkaDsn
+    minio_url: str
+    minio_access_key: str
+    minio_secret_key: str
+    env_type: EnvTypeEnum
 
 
 config = _Config()

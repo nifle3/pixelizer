@@ -1,13 +1,21 @@
+from core.config import config
+from core.logger import setting_logger, logger
 from asyncio import run
+import uvicorn
 
 
 async def _main():
-    import uvicorn
-
-    config = uvicorn.Config("main:app", port=8000, log_level="info")
-    server = uvicorn.Server(config)
+    uvicornConfig = uvicorn.Config()
+    server = uvicorn.Server(uvicornConfig)
     server.run()
 
 
 if __name__ == "__main__":
+    logger.info('Start app')
+
+    logger.info(f'config is{config.model_dump()}')
+
+    setting_logger(config.env_type)
+    logger.info('The logger is already set up')
+
     run(_main)
