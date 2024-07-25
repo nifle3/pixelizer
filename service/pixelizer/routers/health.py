@@ -1,9 +1,9 @@
 from fastapi import APIRouter
 
 
-router = APIRouter()
+health_router = APIRouter()
 
 
-@router.get("/ping")
+@health_router.get("/ping")
 async def ping():
     return {"message": "Hello world"}
