@@ -32,18 +32,8 @@ class _MinioConfig(BaseSettings):
     secret_key: str
 
 
-class _KeycloackConfig(BaseSettings):
-    model_fields = SettingsConfigDict(env_prefix='keycloack')
-
-    url: str
-    client_id: str
-    realm_name: str
-    client_secret_key: str
-
-
 class _Config(BaseSettings):
-    model_fields = SettingsConfigDict(secrets_dir='/var/run',
-                                      env_file='.env',
+    model_fields = SettingsConfigDict(env_file='.env',
                                       env_ignore_empty=True,
                                       env_file_encoding='utf-8')
 
@@ -51,7 +41,6 @@ class _Config(BaseSettings):
     db = _DbConfig()
     kafka = _KafkaConfig()
     minio = _MinioConfig()
-    keycloack = _KeycloackConfig()
 
 
 config = _Config()
