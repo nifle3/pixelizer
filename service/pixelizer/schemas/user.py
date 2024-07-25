@@ -1,20 +1,26 @@
 from uuid import UUID
-from pydantic import BaseModel, EmailStr, Base64Str
+from typing import Optional, List
+from pydantic import BaseModel, EmailStr
 
 
-class AddedUser(BaseModel):
-    email: EmailStr
+class RegistrationUser(BaseModel):
     nickname: str
+    email: EmailStr
     password: str
-    photo: Base64Str
 
 
-class GetedShortUser(BaseModel):
+class LoginUser(BaseModel):
+    email: EmailStr
+    password: str
+
+
+class ShortUser(BaseModel):
     id: UUID
     nickname: str
-    photo_link: str
-
-
-class GetedUser(GetedShortUser):
-    email: EmailStr
+    url_image: Optional[str]
     description: str
+
+
+class User(ShortUser):
+    email: Optional[EmailStr]
+    friends: Optional[List[ShortUser]]
