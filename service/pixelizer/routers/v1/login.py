@@ -4,16 +4,16 @@ from fastapi import APIRouter
 router = APIRouter()
 
 
-@router.post('/v1/create')
+@router.post('/create')
 async def create():
     pass
 
 
-@router.post('/v1/login')
+@router.post('/login')
 async def login():
     pass
 
 
-@router.head('/v1/logout')
+@router.head('/logout')
 async def logout():
     pass

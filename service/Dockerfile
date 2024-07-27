@@ -19,7 +19,7 @@ ENV POETRY_NO_INTERACTION=1 \
     POETRY_VIRTUALENVS_CREATE=1 \
     POETRY_CACHE_DIR=/tmp/poetry_cache
 
-RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install --no-dev
+RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install --only-main
 
 
 FROM python:${PYTHON_VERSION}-slim
@@ -27,5 +27,5 @@ FROM python:${PYTHON_VERSION}-slim
 WORKDIR /app
 COPY --from=builder /app ./
 
-EXPOSE 8080
-CMD fastapi dev pixelizer.main.py
+EXPOSE 8000
+CMD uvicorn main:_main --host 0.0.0.0 --port 8000

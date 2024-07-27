@@ -4,21 +4,21 @@ from fastapi import APIRouter
 router = APIRouter()
 
 
-@router.post('/v1/subscribtion')
+@router.post('/subscribtion')
 async def subscribtion():
     pass
 
 
-@router.get('/v1/subscribtion')
+@router.get('/subscribtion')
 async def get_all_subscribtion():
     pass
 
 
-@router.patch('/v1/subscribtion')
+@router.patch('/subscribtion')
 async def delete_subscribtion():
     pass
 
 
-@router.get('/v1/subscribtion/unconfirmed')
+@router.get('/subscribtion/unconfirmed')
 async def get_unconfirmed_subscribtions():
     pass

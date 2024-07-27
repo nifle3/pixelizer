@@ -1,6 +1,5 @@
-from typing import List
+from uuid import UUID
 from fastapi import APIRouter
-from ...schemas.imgae import Image, CertainImage
 
 
 router = APIRouter()
@@ -12,20 +11,20 @@ async def send_image():
 
 
 @router.get('/image')
-async def get_images() -> List[Image]:
+async def get_images(start: int, end: int):
     pass
 
 
-@router.get('/image/{imageid}')
-async def get_image() -> List[CertainImage]:
+@router.get('/image/{image_id}')
+async def get_image(image_id: int):
     pass
 
 
-@router.get('/user/image/{userid}')
-async def get_image_for_user() -> List[Image]:
+@router.get('/user/image/{user_id}')
+async def get_image_for_user(user_id: UUID, starat: int, end: int):
     pass
 
 
 @router.delete('/image/{id}')
-async def delete_image():
+async def delete_image(id: UUID):
     pass

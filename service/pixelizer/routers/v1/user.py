@@ -1,16 +1,17 @@
+from uuid import UUID
 from fastapi import APIRouter
 
 
 router = APIRouter()
 
 
-@router.get('/user')
+@router.get('/v1/user/me')
 async def get_me():
     pass
 
 
-@router.get('/v1/user/{userid}')
-async def get_another_user():
+@router.get('/v1/user/{user_id}')
+async def get_another_user(user_id: UUID):
     pass
 
 
@@ -29,6 +30,6 @@ async def delete_me():
     pass
 
 
-@router.get('/v1/user/search')
-async def search_user():
+@router.get('/v1/user/search/{name}')
+async def search_user(name: str):
     pass

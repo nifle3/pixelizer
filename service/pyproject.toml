@@ -11,7 +11,6 @@ python = "^3.12"
 fastapi = "^0.111.0"
 sqlalchemy = "^2.0.31"
 asyncpg = "^0.29.0"
-redis = {extras = ["hiredis"], version = "^5.0.7"}
 pydantic-settings = "^2.3.4"
 loguru = "^0.7.2"
 
