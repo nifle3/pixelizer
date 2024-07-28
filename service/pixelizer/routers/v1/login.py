@@ -1,19 +1,21 @@
+from typing import Any
 from fastapi import APIRouter
+from ...schemas.user import RegistrationUser, LoginUser
 
 
 router = APIRouter()
 
 
-@router.post('/create')
-async def create():
-    pass
+@router.post('/create', response_model=Any)
+async def create(user: RegistrationUser) -> Any:
+    raise NotImplementedError()
 
 
-@router.post('/login')
-async def login():
-    pass
+@router.post('/login', response_model=Any)
+async def login(user: LoginUser) -> Any:
+    raise NotImplementedError()
 
 
-@router.head('/logout')
-async def logout():
-    pass
+@router.head('/logout', response_model=Any)
+async def logout() -> Any:
+    raise NotImplementedError()
