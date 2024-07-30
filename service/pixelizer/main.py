@@ -16,7 +16,6 @@ logger.info('The logger is already set up')
 
 app = FastAPI(root_path='/api/v1')
 
-
 app.include_router(health_router, tags=['utility'])
 app.include_router(vone_image_router, tags=['image'])
 app.include_router(vone_user_router, tags=['user'])
