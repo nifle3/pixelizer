@@ -1,9 +1,14 @@
 package config
 
-import "github.com/ilyakaznacheev/cleanenv"
+import (
+	"time"
+
+	"github.com/ilyakaznacheev/cleanenv"
+)
 
 type ServerConfig struct {
-	Port string `yaml:"port" env:"SERVER_PORT"`
+	Port        string        `yaml:"port" env:"SERVER_PORT"`
+	IdleTimeout time.Duration `yaml:"idle_timeout" env:"SERVER_IDLE_TIMEOUT"`
 }
 
 type Config struct {
