@@ -9,5 +9,6 @@ import (
 type Repository interface {
 	add(image Image, file io.Reader) error
 	delete(id uuid.UUID) error
-	markAsCheck(id uuid.UUID) error
+	markAsSend(id uuid.UUID) error
+	getAllNotSend() ([]Image, error)
 }
