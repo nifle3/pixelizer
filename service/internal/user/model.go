@@ -11,6 +11,6 @@ type User struct {
 	Nickname  string
 	Password  string
 	Email     string
-	LastEnter time.Duration
+	LastEnter time.Time
 	LastIP    string
 }

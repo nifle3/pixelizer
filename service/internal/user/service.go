@@ -16,6 +16,12 @@ func New() *Service {
 }
 
 func (s *Service) Add(user User) error {
+	var err error
+	user.Id, err = uuid.NewV6()
+	if err != nil {
+		return err
+	}
+
 	passwordBytes := []byte(user.Password)
 	hashedPassword, err := bcrypt.GenerateFromPassword(passwordBytes, bcrypt.DefaultCost)
 	if err != nil {
