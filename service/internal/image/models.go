@@ -9,5 +9,5 @@ import (
 type Image struct {
 	ID           uuid.UUID
 	CreatedAt    time.Time
-	OriginalLink uuid.UUID
+	OriginalLink string
 }

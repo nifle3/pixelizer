@@ -1,5 +1,7 @@
 package image
 
+import "context"
+
 type Pixelizer interface {
-	Pixelize(image Image) error
+	Pixelize(ctx context.Context, image Image) error
 }

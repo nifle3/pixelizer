@@ -1,6 +1,8 @@
 package user
 
 import (
+	"context"
+
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -15,7 +17,7 @@ func New() *Service {
 	}
 }
 
-func (s *Service) Add(user User) error {
+func (s *Service) Add(ctx context.Context, user User) error {
 	var err error
 	user.Id, err = uuid.NewV6()
 	if err != nil {
@@ -30,15 +32,15 @@ func (s *Service) Add(user User) error {
 
 	user.Password = string(hashedPassword)
 
-	return s.repo.add()
+	return s.repo.add(ctx, user)
 }
 
-func (s *Service) Update(user User) error {
-	return s.repo.update()
+func (s *Service) Update(ctx context.Context, user User) error {
+	return s.repo.update(ctx, user)
 }
 
-func (s *Service) UpdatePassword(userID uuid.UUID, newPassword string, pastPassword string) error {
-	user, err := s.repo.get(userID)
+func (s *Service) UpdatePassword(ctx context.Context, userID uuid.UUID, newPassword string, pastPassword string) error {
+	user, err := s.repo.get(ctx, userID)
 	if err != nil {
 		return err
 	}
@@ -55,9 +57,9 @@ func (s *Service) UpdatePassword(userID uuid.UUID, newPassword string, pastPassw
 
 	stringHashPassword := string(hashedPassword)
 
-	return s.repo.updatePassword(userID, stringHashPassword)
+	return s.repo.updatePassword(ctx, userID, stringHashPassword)
 }
 
-func (s *Service) Delete(user User) error {
-	return s.repo.delete()
+func (s *Service) Delete(ctx context.Context, user User) error {
+	return s.repo.delete(ctx, user.Id)
 }

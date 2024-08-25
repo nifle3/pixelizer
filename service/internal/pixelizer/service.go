@@ -1,7 +1,7 @@
 package pixelizer
 
 import (
-	"time"
+	"context"
 
 	"github.com/nifle3/pixelizer/service/internal/image"
 	"github.com/segmentio/kafka-go"
@@ -10,27 +10,25 @@ import (
 var _ image.Pixelizer = &Pixelizer{}
 
 type Pixelizer struct {
-	writer kafka.Writer
+	writer *kafka.Writer
 }
 
-func New(brokers []string, topicName string, batchSize int, batchTimeout, writeTimeout, readTimeout time.Duration) *Pixelizer {
-	writer := &kafka.Writer{
-		Addr: kafka.TCP(brokers...),
-		Topic: topicName,
-		Balancer: &kafka.LeastBytes{},
-		BatchSize: batchSize,
-		BatchTimeout: batchTimeout,
-		WriteTimeout: writeTimeout,
-		ReadTimeout: readTimeout,
-		Async: false,
-		RequiredAcks: kafka.RequireAll,
-	}
-
-	return Pixelizer{
+func New(writer *kafka.Writer) *Pixelizer {
+	return &Pixelizer{
 		writer: writer,
 	}
 }
 
-func (p *Pixelizer) Pixelize(input image.Image) error {
-	p.writer.WriteMessages(context.)
+func (p *Pixelizer) Pixelize(ctx context.Context, input image.Image) error {
+	key, err := input.ID.MarshalBinary()
+	if err != nil {
+		return err
+	}
+
+	err = p.writer.WriteMessages(ctx, kafka.Message{
+		Key:   key,
+		Value: []byte(input.OriginalLink),
+	})
+
+	return err
 }
