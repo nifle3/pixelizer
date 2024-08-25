@@ -168,23 +168,6 @@ services:
     networks:
       - prod
 
-  traefik:
-    container_name: traefik:v3.1.0
-    restart: unless_stopped
-    security_opt:
-      - no-new-privileges:true
-    ports:
-      - 80:80
-      - 443:443
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./traefik/traefik.yml:/traefik.yml:ro
-    networks:
-      - prod
-    depends_on:
-      server:
-        condition: service_started
-
 volumes:
   db_data:
   redis_data:

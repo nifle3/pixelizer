@@ -1,20 +1,23 @@
-[tool.poetry]
-name = "pixelizer-worker"
-package-mode = false
+[project]
+name = "worker"
 version = "0.1.0"
-description = ""
-authors = ["nifle3 <kuper116rus.2005@gmail.com>"]
+description = "Default template for PDM package"
+authors = [
+    {name = "nifle3", email = "kuper116rus.2005@gmail.com"},
+]
+dependencies = [
+    "numpy>=2.1.0",
+    "opencv-python>=4.10.0.84",
+]
+requires-python = "==3.12.*"
 readme = "README.md"
-
-[tool.poetry.dependencies]
-python = "^3.12"
-numpy = "^2.0.0"
-opencv-python = "^4.10.0.84"
+license = {text = "MIT"}
 
 
-[tool.poetry.group.dev.dependencies]
-matplotlib = "^3.9.1"
+[tool.pdm]
+distribution = false
 
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+[tool.pdm.dev-dependencies]
+dev = [
+    "matplotlib>=3.9.2",
+]
